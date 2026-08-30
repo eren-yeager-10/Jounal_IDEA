@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Isolated user document space - strictly authenticated owner-only access
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // Journal reflections and multi-turn entries
+      match /entries/{entryId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+
+        // Emotional cartography metadata subcollection
+        match /metadata/{metaDoc} {
+          allow read, write: if request.auth != null && request.auth.uid == userId;
+        }
+      }
+
+      // Time-gated letters to future self (private, self-only)
+      match /futureLetters/{letterId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      // Interaction sessions
+      match /interactions/{interactionId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // Top-level Sealed Letters (Burn After Reading)
+    // Listing/querying the collection is strictly forbidden (deny list) to prevent discovery.
+    // Document creation and atomic one-time consumption (transition to opened=true) are strictly validated.
+    match /sharedLetters/{letterId} {
+      allow list, delete: if false;
+      allow get: if true;
+      allow create: if request.resource.data.keys().hasAll(['id', 'content', 'teaser', 'opened', 'createdAt'])
+                    && request.resource.data.opened == false
+                    && request.resource.data.content is string
+                    && request.resource.data.id == letterId;
+      allow update: if resource.data.opened == false
+                    && request.resource.data.opened == true;
+    }
+  }
+}
+

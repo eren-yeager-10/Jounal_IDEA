@@ -1,0 +1,83 @@
+{
+  "entities": {
+    "JournalEntry": {
+      "title": "JournalEntry",
+      "description": "A user reflection with multi-turn messages and optional emotional cartography metadata",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "summary": { "type": "string" },
+        "tags": { "type": "array" },
+        "messages": { "type": "array" },
+        "cartography": { "type": "object" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["id", "userId", "title", "content", "createdAt", "updatedAt"]
+    },
+    "CartographyMetadata": {
+      "title": "CartographyMetadata",
+      "description": "Structured AI-extracted emotional metrics for an entry",
+      "type": "object",
+      "properties": {
+        "themes": { "type": "array" },
+        "people": { "type": "array" },
+        "sentiment": { "type": "number" },
+        "recurring_flag": { "type": "boolean" },
+        "analyzedAt": { "type": "number" }
+      },
+      "required": ["themes", "people", "sentiment", "recurring_flag"]
+    },
+    "FutureLetter": {
+      "title": "FutureLetter",
+      "description": "A private time-gated letter from the user's future self",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "deliveryDate": { "type": "string" },
+        "delivered": { "type": "boolean" },
+        "teaser": { "type": "string" },
+        "content": { "type": "string" },
+        "fromEntryTitle": { "type": "string" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["id", "userId", "deliveryDate", "delivered", "teaser", "content", "createdAt"]
+    },
+    "SharedLetter": {
+      "title": "SharedLetter",
+      "description": "A top-level public one-time-read burn-after-reading sealed letter",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "teaser": { "type": "string" },
+        "content": { "type": "string" },
+        "opened": { "type": "boolean" },
+        "openedAt": { "type": "number" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["id", "teaser", "content", "opened", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/entries/{entryId}": {
+      "schema": "JournalEntry",
+      "description": "Private user journal reflections"
+    },
+    "/users/{userId}/entries/{entryId}/metadata/{metaDoc}": {
+      "schema": "CartographyMetadata",
+      "description": "Private emotional cartography metadata subcollection"
+    },
+    "/users/{userId}/futureLetters/{letterId}": {
+      "schema": "FutureLetter",
+      "description": "Private time-gated letters to future self"
+    },
+    "/sharedLetters/{letterId}": {
+      "schema": "SharedLetter",
+      "description": "Top-level sealed burn-after-reading letters accessed only via atomic server transaction"
+    }
+  }
+}
